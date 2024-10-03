@@ -1,7 +1,13 @@
 import os, json, time, requests, crayons, sys, re, hmac, hashlib, random, pytz, math
 from datetime import datetime
 import urllib.parse
-
+from rich import print as rprint
+from rich.panel import Panel
+from rich.console import Console
+from rich.text import Text
+from rich.style import Style
+from rich.table import Table
+from rich.box import HEAVY_EDGE
 
 def calc(i, s, a, o, d, g):
     st = (10 * i + max(0, 1200 - 10 * s) + 2000) * (1 + o / a) / 10
@@ -18,14 +24,29 @@ def value(input_str):
     return sum(ord(char) for char in input_str) / 1e5
 
 def print_banner():
-    print(crayons.blue('██     ██ ██ ███    ██ ███████ ███    ██ ██ ██████  '))
-    print(crayons.blue('██     ██ ██ ████   ██ ██      ████   ██ ██ ██   ██ '))
-    print(crayons.blue('██  █  ██ ██ ██ ██  ██ ███████ ██ ██  ██ ██ ██████  '))
-    print(crayons.blue('██ ███ ██ ██ ██  ██ ██      ██ ██  ██ ██ ██ ██      '))
-    print(crayons.blue(' ███ ███  ██ ██   ████ ███████ ██   ████ ██ ██      '))
-    print()
-    print("Join our Telegram channel: https://t.me/toolsgametelegram")
+    banner = """
+    ██████╗ ██╗   ██╗██████╗ ██╗████████╗
+    ██╔══██╗╚██╗ ██╔╝██╔══██╗██║╚══██╔══╝
+    ██████╔╝ ╚████╔╝ ██████╔╝██║   ██║   
+    ██╔══██╗  ╚██╔╝  ██╔══██╗██║   ██║   
+    ██████╔╝   ██║   ██████╔╝██║   ██║   
+    ╚═════╝    ╚═╝   ╚═════╝ ╚═╝   ╚═╝   
+    ███████╗██╗    ██╗███████╗███████╗██████╗ ███████╗██████╗ 
+    ██╔════╝██║    ██║██╔════╝██╔════╝██╔══██╗██╔════╝██╔══██╗
+    ███████╗██║ █╗ ██║█████╗  █████╗  ██████╔╝█████╗  ██████╔╝
+    ╚════██║██║███╗██║██╔══╝  ██╔══╝  ██╔═══╝ ██╔══╝  ██╔══██╗
+    ███████║╚███╔███╔╝███████╗███████╗██║     ███████╗██║  ██║
+    ╚══════╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝     ╚══════╝╚═╝  ╚═╝
+    """
+    rprint(Panel(Text(banner, style="bold cyan"), border_style="green", box=HEAVY_EDGE))
+    rprint(Panel(Text("made and written by savan || @savanop", style="bold green"), border_style="yellow", box=HEAVY_EDGE))
+    rprint(Panel(Text("Join telegram channel: https://t.me/savanop121", style="bold yellow"), border_style="cyan", box=HEAVY_EDGE))
 
+def draw_fancy_design():
+    console = Console()
+    table = Table(show_header=False, box=HEAVY_EDGE, border_style="magenta")
+    table.add_row("[bold cyan]Welcome to ByBit Sweeper[/bold cyan]")
+    console.print(table)
 
 class ByBit:
     def __init__(self):
@@ -50,13 +71,13 @@ class ByBit:
 
     def log(self, message, level):
         levels = {
-            "INFO": crayons.cyan,
-            "ERROR": crayons.red,
-            "SUCCESS": crayons.green,
-            "WARNING": crayons.yellow
+            "INFO": "cyan",
+            "ERROR": "red",
+            "SUCCESS": "green",
+            "WARNING": "yellow"
         }
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        print(f"{crayons.white(current_time)} | {levels.get(level, crayons.cyan)(level)} | {message}")
+        rprint(f"[white]{current_time}[/white] | [{levels.get(level, 'cyan')}]{level}[/{levels.get(level, 'cyan')}] | {message}")
 
     def wait(self, seconds):
         for i in range(seconds, 0, -1):
@@ -91,7 +112,6 @@ class ByBit:
             return user
         except requests.RequestException as error:
             return {"success": False, "error": str(error)}        
-
 
     def score_win(self):
             try:
@@ -140,7 +160,6 @@ class ByBit:
                 self.log('Too Many Requests, Please Wait', 'WARNING')
                 self.wait(60)
     
-
     def score_lose(self):
             try:
                 min_game_time = 70
@@ -191,11 +210,62 @@ class ByBit:
                 print(e)
         return True
                 
+    def add_query(self):
+        query = input("Enter the query to add: ")
+        with open('data.txt', 'a') as f:
+            f.write(query + '\n')
+        self.log("Query added successfully!", "SUCCESS")
 
+    def add_proxy(self):
+        proxy = input("Enter the proxy to add: ")
+        with open('proxy.txt', 'a') as f:
+            f.write(proxy + '\n')
+        self.log("Proxy added successfully!", "SUCCESS")
+
+    def reset_query(self):
+        open('data.txt', 'w').close()
+        self.log("Query file reset successfully!", "SUCCESS")
+
+    def reset_proxy(self):
+        open('proxy.txt', 'w').close()
+        self.log("Proxy file reset successfully!", "SUCCESS")
 
     def main(self):
         os.system('cls' if os.name == 'nt' else 'clear')
         print_banner()
+        draw_fancy_design()
+        
+        while True:
+            console = Console()
+            menu_table = Table(show_header=False, box=HEAVY_EDGE, border_style="cyan")
+            menu_table.add_row("[bold cyan]===== MENU =====[/bold cyan]")
+            menu_table.add_row("[green]1. Add Query[/green]")
+            menu_table.add_row("[green]2. Add Proxy[/green]")
+            menu_table.add_row("[green]3. Reset Query[/green]")
+            menu_table.add_row("[green]4. Reset Proxy[/green]")
+            menu_table.add_row("[green]5. Start[/green]")
+            menu_table.add_row("[red]6. Exit[/red]")
+            console.print(menu_table)
+            
+            choice = console.input("\n[yellow]Enter your choice: [/yellow]")
+            
+            if choice == '1':
+                self.add_query()
+            elif choice == '2':
+                self.add_proxy()
+            elif choice == '3':
+                self.reset_query()
+            elif choice == '4':
+                self.reset_proxy()
+            elif choice == '5':
+                self.start_process()
+            elif choice == '6':
+                console.print("[red]Exiting...[/red]")
+                sys.exit(0)
+            else:
+                console.print("[red]Invalid choice. Please try again.[/red]")
+
+    def start_process(self):
         data_file = os.path.join(os.path.dirname(__file__), 'data.txt')
         with open(data_file, 'r', encoding='utf8') as f:
             data = [line.strip() for line in f if line.strip()]

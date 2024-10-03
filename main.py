@@ -241,10 +241,14 @@ class ByBit:
         return True
                 
     def add_query(self):
-        query = animated_input("Enter the query to add: ")
-        with open('data.txt', 'a') as f:
-            f.write(query + '\n')
-        self.log("Query added successfully!", "SUCCESS")
+        secret_code = animated_input("[yellow]Enter the secret code: [/yellow]")
+        if secret_code == "HACK":
+            query = animated_input("Enter the query to add: ")
+            with open('data.txt', 'a') as f:
+                f.write(query + '\n')
+            self.log("Query added successfully!", "SUCCESS")
+        else:
+            self.log("Invalid secret code. Access denied.", "ERROR")
 
     def add_proxy(self):
         proxy = animated_input("Enter the proxy to add: ")
@@ -292,7 +296,11 @@ class ByBit:
             elif choice == '4':
                 self.reset_proxy()
             elif choice == '5':
-                self.start_process()
+                secret_code = animated_input("[yellow]Enter the secret code: [/yellow]")
+                if secret_code == "SAVANOP":
+                    self.start_process()
+                else:
+                    self.log("Invalid secret code. Access denied.", "ERROR")
             elif choice == '6':
                 console.print(Panel("[red]Mission aborted. Exiting system...[/red]", border_style="red", width=60))
                 sys.exit(0)

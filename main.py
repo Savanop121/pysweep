@@ -291,30 +291,37 @@ class ByBit:
 
     def start_process(self):
         os.system('cls' if os.name == 'nt' else 'clear')
-        animate_banner()  # Changed from print_banner() to animate_banner()
+        animate_banner()
         data_file = os.path.join(os.path.dirname(__file__), 'data.txt')
         with open(data_file, 'r', encoding='utf8') as f:
             data = [line.strip() for line in f if line.strip()]
 
+        if not data:
+            self.log("No data found in data.txt. Please add queries first.", "ERROR")
+            return
+
         while True:
             proxies = [line.strip() for line in open('proxy.txt') if line.strip()]
             for i, init_data in enumerate(data):
-                proxy = proxies[(i - 1) % len(proxies)] if proxies else None
+                proxy = proxies[i % len(proxies)] if proxies else None
                 if proxy:
                     self.session.proxies.update({'http': proxy, 'https': proxy})
-                decoded = url_decode(init_data)
-                finaldat = (url_decode(decoded))
-                user_data = json.loads(finaldat.split('user=')[1].split('&')[0])
-                self.log(f"========== Account {i + 1} | {user_data['first_name']} ==========", 'INFO')
-                self.log(f"self.logging into account {user_data['id']}...", 'INFO')
-                login_result = self.login(init_data)
-                if login_result["success"]:
-                    self.log('login successful!', "SUCCESS")
-                    game_result = self.score()
-                    if not game_result:
-                        self.log('Need to self.log in again, moving to the next account', 'WARNING')
-                else:
-                    self.log(f"login failed! {login_result['error']}", 'ERROR')
+                try:
+                    decoded = url_decode(init_data)
+                    finaldat = url_decode(decoded)
+                    user_data = json.loads(finaldat.split('user=')[1].split('&')[0])
+                    self.log(f"========== Account {i + 1} | {user_data['first_name']} ==========", 'INFO')
+                    self.log(f"Logging into account {user_data['id']}...", 'INFO')
+                    login_result = self.login(init_data)
+                    if login_result["success"]:
+                        self.log('Login successful!', "SUCCESS")
+                        game_result = self.score()
+                        if not game_result:
+                            self.log('Need to log in again, moving to the next account', 'WARNING')
+                    else:
+                        self.log(f"Login failed! {login_result['error']}", 'ERROR')
+                except Exception as e:
+                    self.log(f"Error processing account {i + 1}: {str(e)}", 'ERROR')
 
                 if i < len(data) - 1:
                     self.wait(3)

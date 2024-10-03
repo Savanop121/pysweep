@@ -174,6 +174,10 @@ class ByBit:
                 elif res.status_code == 401:
                     self.log('Token expired, need to log in again', "ERROR")
                     return False
+                elif res.status_code == 429:
+                    self.log('Too Many Requests, Please Wait', 'WARNING')
+                    self.wait(60)
+                    return True
                 else:
                     self.log(f"An Error Occurred With Code {res.status_code}", 'ERROR')
                 self.wait(5)
@@ -213,6 +217,10 @@ class ByBit:
                 elif res.status_code == 401:
                     self.log('Token expired, need to log in again', "ERROR")
                     return False
+                elif res.status_code == 429:
+                    self.log('Too Many Requests, Please Wait', 'WARNING')
+                    self.wait(60)
+                    return True
                 else:
                     self.log(f"An Error Occurred With Code {res.status_code}", 'ERROR')
                 self.wait(5)

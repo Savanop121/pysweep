@@ -111,7 +111,7 @@ class ByBit:
 
     def login(self, init_data):
         try:
-            self.headers = { "tl-init-data": init_data}
+            self.headers["tl-init-data"] = init_data
             response = self.session.post("https://api.bybitcoinsweeper.com/api/auth/login", json={"initData": init_data}, headers=self.headers)
             if response.status_code == 201:
                 data = response.json()
@@ -123,7 +123,7 @@ class ByBit:
                     "userId": data['id']
                 }
             else:
-                return {"success": False, "error": "Unexpected status code"}
+                return {"success": False, "error": f"Unexpected status code: {response.status_code}"}
         except requests.RequestException as error:
             return {"success": False, "error": str(error)}
         
@@ -172,7 +172,7 @@ class ByBit:
                     self.info["score"] += score
                     self.log(f"Game Status: WIN","SUCCESS")
                 elif res.status_code == 401:
-                    self.log('Token expired, need to self.log in again', "ERROR")
+                    self.log('Token expired, need to log in again', "ERROR")
                     return False
                 else:
                     self.log(f"An Error Occurred With Code {res.status_code}", 'ERROR')
@@ -211,7 +211,7 @@ class ByBit:
                 if res.status_code == 201:
                     self.log(f"Game Status: LOSEEEEEEEE","ERROR")
                 elif res.status_code == 401:
-                    self.log('Token expired, need to self.log in again', "ERROR")
+                    self.log('Token expired, need to log in again', "ERROR")
                     return False
                 else:
                     self.log(f"An Error Occurred With Code {res.status_code}", 'ERROR')

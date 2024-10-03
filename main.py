@@ -1,4 +1,4 @@
-import os, json, time, requests, crayons, sys, re, hmac, hashlib, random, pytz, math
+import os, json, time, requests, sys, re, hmac, hashlib, random, pytz, math
 from datetime import datetime
 import urllib.parse
 from rich import print as rprint
@@ -7,7 +7,18 @@ from rich.console import Console
 from rich.text import Text
 from rich.style import Style
 from rich.table import Table
-from rich.box import HEAVY_EDGE
+from rich.box import HEAVY_EDGE, ROUNDED
+from rich.layout import Layout
+from rich.live import Live
+from rich.syntax import Syntax
+from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn
+from rich.align import Align
+from rich.columns import Columns
+from rich.markdown import Markdown
+from rich.prompt import Prompt
+from rich.progress import track
+from rich.rule import Rule
+
 
 def calc(i, s, a, o, d, g):
     st = (10 * i + max(0, 1200 - 10 * s) + 2000) * (1 + o / a) / 10
@@ -23,30 +34,44 @@ def url_decode(encoded_url):
 def value(input_str):
     return sum(ord(char) for char in input_str) / 1e5
 
-def print_banner():
-    banner = """
-    ██████╗ ██╗   ██╗██████╗ ██╗████████╗
-    ██╔══██╗╚██╗ ██╔╝██╔══██╗██║╚══██╔══╝
-    ██████╔╝ ╚████╔╝ ██████╔╝██║   ██║   
-    ██╔══██╗  ╚██╔╝  ██╔══██╗██║   ██║   
-    ██████╔╝   ██║   ██████╔╝██║   ██║   
-    ╚═════╝    ╚═╝   ╚═════╝ ╚═╝   ╚═╝   
-    ███████╗██╗    ██╗███████╗███████╗██████╗ ███████╗██████╗ 
-    ██╔════╝██║    ██║██╔════╝██╔════╝██╔══██╗██╔════╝██╔══██╗
-    ███████╗██║ █╗ ██║█████╗  █████╗  ██████╔╝█████╗  ██████╔╝
-    ╚════██║██║███╗██║██╔══╝  ██╔══╝  ██╔═══╝ ██╔══╝  ██╔══██╗
-    ███████║╚███╔███╔╝███████╗███████╗██║     ███████╗██║  ██║
-    ╚══════╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝     ╚══════╝╚═╝  ╚═╝
-    """
-    rprint(Panel(Text(banner, style="bold cyan"), border_style="green", box=HEAVY_EDGE))
-    rprint(Panel(Text("made and written by savan || @savanop", style="bold green"), border_style="yellow", box=HEAVY_EDGE))
-    rprint(Panel(Text("Join telegram channel: https://t.me/savanop121", style="bold yellow"), border_style="cyan", box=HEAVY_EDGE))
+def animate_banner():
+    banner = [
+        "███████  █████  ██    ██  █████  ███    ██ ",
+        "██      ██   ██ ██    ██ ██   ██ ████   ██ ",
+        "███████ ███████ ██    ██ ███████ ██ ██  ██ ",
+        "     ██ ██   ██  ██  ██  ██   ██ ██  ██ ██ ",
+        "███████ ██   ██   ████   ██   ██ ██   ████ "
+    ]
+    
+    colors = ["cyan", "blue", "green", "yellow", "magenta", "red"]
+    
+    for _ in range(10):  # Animate for 10 cycles
+        for i, line in enumerate(banner):
+            color = colors[i % len(colors)]
+            rprint(f"[{color}]{line}[/{color}]")
+        time.sleep(0.5)
+        os.system('cls' if os.name == 'nt' else 'clear')
+        colors = colors[1:] + [colors[0]]  # Rotate colors
 
-def draw_fancy_design():
-    console = Console()
-    table = Table(show_header=False, box=HEAVY_EDGE, border_style="magenta")
-    table.add_row("[bold cyan]Welcome to ByBit Sweeper[/bold cyan]")
-    console.print(table)
+def animate_header_footer():
+    header = "ByBit Sweeper"
+    body = "Welcome to the Hacker's Paradise"
+    footer = "Proceed with caution..."
+    
+    for _ in range(2):  # Animate for 5 cycles
+        rprint(Panel(f"[cyan]{header}[/cyan]", border_style="cyan"))
+        time.sleep(0.3)
+        rprint(Panel(f"[green]{body}[/green]", border_style="green"))
+        time.sleep(0.3)
+        rprint(Panel(f"[yellow]{footer}[/yellow]", border_style="yellow"))
+        time.sleep(0.3)
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+def animated_input(prompt):
+    for char in prompt:
+        rprint(f"[cyan]{char}[/cyan]", end='', flush=True)
+        time.sleep(0.05)
+    return input()
 
 class ByBit:
     def __init__(self):
@@ -77,16 +102,12 @@ class ByBit:
             "WARNING": "yellow"
         }
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        rprint(f"[white]{current_time}[/white] | [{levels.get(level, 'cyan')}]{level}[/{levels.get(level, 'cyan')}] | {message}")
+        console = Console()
+        console.print(Panel(f"[white]{current_time}[/white] | [{levels.get(level, 'cyan')}]{level}[/{levels.get(level, 'cyan')}] | {message}", border_style=levels.get(level, 'cyan'), width=60))
 
     def wait(self, seconds):
-        for i in range(seconds, 0, -1):
-            timestamp = time.strftime("%H:%M:%S", time.localtime())
-            sys.stdout.write(f"\r[{timestamp}] [*] Waiting {i} seconds to continue...")
-            sys.stdout.flush()
+        for _ in track(range(seconds), description=f"Waiting for {seconds} seconds..."):
             time.sleep(1)
-        sys.stdout.write("\r")
-        sys.stdout.flush()
 
     def login(self, init_data):
         try:
@@ -160,6 +181,7 @@ class ByBit:
                 self.log('Too Many Requests, Please Wait', 'WARNING')
                 self.wait(60)
     
+
     def score_lose(self):
             try:
                 min_game_time = 70
@@ -211,13 +233,13 @@ class ByBit:
         return True
                 
     def add_query(self):
-        query = input("Enter the query to add: ")
+        query = animated_input("Enter the query to add: ")
         with open('data.txt', 'a') as f:
             f.write(query + '\n')
         self.log("Query added successfully!", "SUCCESS")
 
     def add_proxy(self):
-        proxy = input("Enter the proxy to add: ")
+        proxy = animated_input("Enter the proxy to add: ")
         with open('proxy.txt', 'a') as f:
             f.write(proxy + '\n')
         self.log("Proxy added successfully!", "SUCCESS")
@@ -232,22 +254,26 @@ class ByBit:
 
     def main(self):
         os.system('cls' if os.name == 'nt' else 'clear')
-        print_banner()
-        draw_fancy_design()
+        animate_banner()
+        animate_header_footer()
         
         while True:
             console = Console()
-            menu_table = Table(show_header=False, box=HEAVY_EDGE, border_style="cyan")
-            menu_table.add_row("[bold cyan]===== MENU =====[/bold cyan]")
-            menu_table.add_row("[green]1. Add Query[/green]")
-            menu_table.add_row("[green]2. Add Proxy[/green]")
-            menu_table.add_row("[green]3. Reset Query[/green]")
-            menu_table.add_row("[green]4. Reset Proxy[/green]")
-            menu_table.add_row("[green]5. Start[/green]")
-            menu_table.add_row("[red]6. Exit[/red]")
-            console.print(menu_table)
+            menu_table = Table(show_header=False, box=ROUNDED, border_style="cyan", width=60)
+            menu_table.add_row(Rule(style="bold red"))
+            menu_table.add_row("[bold red]===== HACKER'S MENU =====[/bold red]")
+            menu_table.add_row(Rule(style="bold red"))
+            menu_table.add_row("[green]1. ADD query[/green]")
+            menu_table.add_row("[green]2. add Proxy[/green]")
+            menu_table.add_row("[green]3. reset Query Database[/green]")
+            menu_table.add_row("[green]4. reset Proxy Network[/green]")
+            menu_table.add_row("[green]5. bybit start Hack[/green]")
+            menu_table.add_row("[red]6. Abort Mission[/red]")
+            menu_table.add_row(Rule(style="bold red"))
             
-            choice = console.input("\n[yellow]Enter your choice: [/yellow]")
+            console.print(Panel(Align.center(menu_table), border_style="cyan", box=ROUNDED, width=60))
+            
+            choice = animated_input("[yellow]Enter your command: [/yellow]")
             
             if choice == '1':
                 self.add_query()
@@ -260,12 +286,12 @@ class ByBit:
             elif choice == '5':
                 self.start_process()
             elif choice == '6':
-                console.print("[red]Exiting...[/red]")
+                console.print(Panel("[red]Mission aborted. Exiting system...[/red]", border_style="red", width=60))
                 sys.exit(0)
-            else:
-                console.print("[red]Invalid choice. Please try again.[/red]")
 
     def start_process(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
+        animate_banner()  # Changed from print_banner() to animate_banner()
         data_file = os.path.join(os.path.dirname(__file__), 'data.txt')
         with open(data_file, 'r', encoding='utf8') as f:
             data = [line.strip() for line in f if line.strip()]

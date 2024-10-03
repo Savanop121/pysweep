@@ -1,3 +1,8 @@
 requests
 crayons
 pytz
+rich
+pytz
+urllib3
+hmac
+hashlib
